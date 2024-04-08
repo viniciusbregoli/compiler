@@ -11,15 +11,15 @@ class LexicalAnalyzer:
     def classifyToken(self, token):  # Classify the tokens
         if token in ("+", "-", "*", "/", "%", "^", "|"):
             return "OPERATOR"
-        elif token in ("(", ")"):
-            return "PARENTHESIS"
-        elif token in ("RES", "MEM"):
-            return "SPECIAL COMMAND"
+        elif token in ("RES"):
+            return "RES"
+        elif token in ("MEM"):
+            return "MEMORY"
         else:
             return "NUMBER"
 
     def analyze(self, line):  # Analyze the tokens
-        tokenRegex = r"\(|\)|\+|-|\*|/|%|\^|\||[0-9]+(?:\.[0-9]+)?|\bRES\b|\bMEM\b"
+        tokenRegex = r"\+|-|\*|/|%|\^|\||[0-9]+(?:\.[0-9]+)?|\bRES\b|\bMEM\b"
         tokens = re.findall(tokenRegex, line)
         return [(token, self.classifyToken(token)) for token in tokens]
 
@@ -32,17 +32,33 @@ class LexicalAnalyzer:
         return lines
 
     def buildTree(self):
+        MEM = 0
         for line in self.lines:
             tokens = self.analyze(line)
             stack = []
+            i = 0
             for token, type in tokens:
                 if type == "NUMBER":
                     stack.append(TreeNode(token, type="NUMBER"))
+                elif type == "MEMORY":
+                    try:
+                        nextToken, nextType = tokens[i + 1]
+                        if nextType == "OPERATOR" or nextType == "NUMBER":
+                            stack.append(TreeNode(token, type="MEMORY"))
+                    except IndexError:
+                        try:
+                            right = stack.pop()
+                            left = stack.pop()
+                            stack.append(TreeNode(token, type="MEMORY", children=[left, right]))
+                        except IndexError:
+                            MEM = right
+                            stack.append(TreeNode(token, type="MEMORY", children=[right]))
                 elif type == "OPERATOR":
                     right = stack.pop()
                     left = stack.pop()
                     node = TreeNode(token, type="OPERATOR", children=[left, right])
                     stack.append(node)
+                i += 1
             yield stack.pop()  # Retorna a raiz da AST para a linha atual
 
 

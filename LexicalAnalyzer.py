@@ -6,6 +6,7 @@ class LexicalAnalyzer:
     def __init__(self, filepath):  # Constructor
         self.filepath = filepath
         self.lines = self.analyzeFile()
+        self.trees = list(self.buildTree())
 
     def classifyToken(self, token):  # Classify the tokens
         if token in ("+", "-", "*", "/", "%", "^", "|"):
@@ -42,12 +43,12 @@ class LexicalAnalyzer:
                     left = stack.pop()
                     node = TreeNode(token, type="OPERATOR", children=[left, right])
                     stack.append(node)
-                # Adicione condições adicionais para tipos especiais de tokens se necessário
             yield stack.pop()  # Retorna a raiz da AST para a linha atual
 
 
-lex = LexicalAnalyzer("input.txt")
-asts = list(lex.buildTree())
-for ast in asts:
+lex = LexicalAnalyzer("./misc/input.txt")
+for index, ast in enumerate(lex.trees):
     ast_graph = visualize_ast(ast)
-    ast_graph.render('ast', format='png', cleanup=True)  # Isso gera um arquivo 'ast.png'
+    ast_graph.render(
+        filename=f"{index + 1}_ast", directory="./tree_imgs", format="png", cleanup=True
+    )

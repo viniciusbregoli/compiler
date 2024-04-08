@@ -1,5 +1,5 @@
 import re
-from TreeNode import TreeNode
+from TreeNode import *
 
 
 class LexicalAnalyzer:
@@ -30,8 +30,7 @@ class LexicalAnalyzer:
             file.close()
         return lines
 
-    def buildAST(self):
-        # Este método pressupõe que as expressões estejam em notação RPN adequada
+    def buildTree(self):
         for line in self.lines:
             tokens = self.analyze(line)
             stack = []
@@ -48,6 +47,7 @@ class LexicalAnalyzer:
 
 
 lex = LexicalAnalyzer("input.txt")
-asts = list(lex.buildAST())
+asts = list(lex.buildTree())
 for ast in asts:
-    print(ast)
+    ast_graph = visualize_ast(ast)
+    ast_graph.render('ast', format='png', cleanup=True)  # Isso gera um arquivo 'ast.png'

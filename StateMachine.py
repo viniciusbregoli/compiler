@@ -1,4 +1,5 @@
 import re
+from Node import *
 
 with open("input.txt", "r") as arquivo:
     linhas = arquivo.readlines()
@@ -11,17 +12,11 @@ tokens = []
 parenteses = 0
 
 
-def separarTokens(tokens):
-    tokens = "".join(tokens)
-    pattern = r"(\d+\.\d+|\s|[()+-])"
-    tokens = re.findall(pattern, tokens)
-    return tokens
-
-
 def main():
     global i
     global isValido
     global parenteses
+    global tokens
     for linha in linhas:
         i = 0
         parenteses = 0
@@ -29,9 +24,16 @@ def main():
         look = ""
         start(look, linha)
         if isValido:
-            print("Linha válida: ", linha, "Tokens: ", separarTokens(tokens))
+            print("Linha válida: ", linha.replace("\n", ""))
+            print("Tokens: ", separarTokens(tokens))
+            print(
+                "Arvore: ",
+            )
+            print_tree(build_syntax_tree(montarPilha(separarTokens(tokens))))
         else:
             print("Linha inválida: ", linha)
+        print()
+        tokens = []
 
 
 def start(look, linha):
@@ -231,6 +233,47 @@ def estado15(look, linha):
         tokens.append("RES")
         look = proximo(linha)
         estado5(look, linha)
+
+
+def separarTokens(tokens):
+    tokens = "".join(tokens)
+    pattern = re.compile(r"\d+\.\d+|\d+|[()+\-*\/]| ")
+    return pattern.findall(tokens)
+
+
+def montarPilha(tokens):
+    global operations
+    pilha = []
+    for token in tokens:
+        try:
+            if token == "MEM" or token == "RES" or token in operations:
+                pilha.append(token)
+            elif float(token):
+                pilha.append(float(token))
+        except:
+            pass
+    return pilha
+
+
+def solve_rpn(expression):
+    stack = []
+    for token in expression:
+        if token in ["+", "-", "*", "/"]:
+            b = stack.pop()  # Remove e retorna o último item
+            a = stack.pop()  # Remove e retorna o penúltimo item
+            if token == "+":
+                stack.append(a + b)
+            elif token == "-":
+                stack.append(a - b)
+            elif token == "*":
+                stack.append(a * b)
+            elif token == "/":
+                stack.append(a / b)
+        else:
+            stack.append(
+                float(token)
+            )  # Converte o token para float e adiciona na pilha
+    return stack.pop()  # Retorna o resultado final
 
 
 main()

@@ -6,10 +6,12 @@ with open("input.txt", "r") as arquivo:
     arquivo.close()
 
 
-global i, operations, tokens, parenteses
+global i, operations, tokens, parenteses, MEM, resultados
 operations = ["+", "-", "*", "/", "|", "%", "^"]
 tokens = []
 parenteses = 0
+MEM = 0
+resultados = []
 
 
 def main():
@@ -17,6 +19,8 @@ def main():
     global isValido
     global parenteses
     global tokens
+    global MEM
+    MEM = 0
     for linha in linhas:
         i = 0
         parenteses = 0
@@ -25,11 +29,9 @@ def main():
         start(look, linha)
         if isValido:
             print("Linha válida: ", linha.replace("\n", ""))
-            print("Tokens: ", separarTokens(tokens))
-            print(
-                "Arvore: ",
-            )
-            print_tree(build_syntax_tree(montarPilha(separarTokens(tokens))))
+            print("Tokens: ", montarPilha(separarTokens(tokens)))
+            visualize_tree(build_syntax_tree(montarPilha(separarTokens(tokens))))
+            print("Resultado: ", solve_rpn(montarPilha(separarTokens(tokens))))
         else:
             print("Linha inválida: ", linha)
         print()
@@ -102,6 +104,9 @@ def estado2(look, linha):
         parenteses += 1
         look = proximo(linha)
         estado0(look, linha)
+    elif look in operations:
+        look = proximo(linha)
+        estado5(look, linha)
 
 
 def estado3(look, linha):
@@ -237,7 +242,7 @@ def estado15(look, linha):
 
 def separarTokens(tokens):
     tokens = "".join(tokens)
-    pattern = re.compile(r"\d+\.\d+|\d+|[()+\-*\/]| ")
+    pattern = re.compile(r"\d+\.\d+|\d+|MEM|RES|[()+\-*\/%^]| ")
     return pattern.findall(tokens)
 
 
@@ -256,9 +261,11 @@ def montarPilha(tokens):
 
 
 def solve_rpn(expression):
+    global MEM, resultados
     stack = []
-    for token in expression:
-        if token in ["+", "-", "*", "/"]:
+    for j in range(len(expression)):
+        token = expression[j]
+        if token in operations:
             b = stack.pop()  # Remove e retorna o último item
             a = stack.pop()  # Remove e retorna o penúltimo item
             if token == "+":
@@ -269,11 +276,30 @@ def solve_rpn(expression):
                 stack.append(a * b)
             elif token == "/":
                 stack.append(a / b)
+            elif token == "%":  # Trata o módulo
+                stack.append(a % b)
+            elif token == "^":  # Trata a exponenciação
+                stack.append(a**b)
+        elif token == "MEM":
+            try:
+                if expression[j + 1] in operations or type(expression[j + 1]) == float:
+                    stack.append(MEM)
+                else:
+                    MEM = stack.pop()
+                    stack.append(0.0)
+            except:
+                MEM = stack.pop()
+                stack.append(0.0)
+        elif token == "RES":
+            try:
+                n = int(stack.pop())
+                stack.append(resultados[-n])
+            except:
+                stack.append(0.0)
         else:
-            stack.append(
-                float(token)
-            )  # Converte o token para float e adiciona na pilha
-    return stack.pop()  # Retorna o resultado final
+            stack.append(float(token))
+    resultados.append(stack.pop())
+    return resultados[-1]  # Retorna o resultado final
 
 
 main()

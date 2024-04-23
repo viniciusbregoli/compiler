@@ -1,12 +1,21 @@
+import re
+
 with open("input.txt", "r") as arquivo:
     linhas = arquivo.readlines()
     arquivo.close()
 
 
-global i, operations, token, parenteses
+global i, operations, tokens, parenteses
 operations = ["+", "-", "*", "/", "|", "%", "^"]
-token = []
+tokens = []
 parenteses = 0
+
+
+def separarTokens(tokens):
+    tokens = "".join(tokens)
+    pattern = r"(\d+\.\d+|\s|[()+-])"
+    tokens = re.findall(pattern, tokens)
+    return tokens
 
 
 def main():
@@ -20,7 +29,7 @@ def main():
         look = ""
         start(look, linha)
         if isValido:
-            print("Linha válida: ", linha)
+            print("Linha válida: ", linha, "Tokens: ", separarTokens(tokens))
         else:
             print("Linha inválida: ", linha)
 
@@ -35,7 +44,11 @@ def start(look, linha):
 
 
 def proximo(linha):
-    global i
+    global i, tokens
+    try:
+        tokens.append(linha[i])
+    except:
+        pass
     i += 1
     if i >= len(linha):
         return "\n"
@@ -44,7 +57,7 @@ def proximo(linha):
 
 
 def estado0(look, linha):
-    global parenteses
+    global parenteses, tokens
     if look == "(":
         parenteses += 1
         look = proximo(linha)
@@ -149,12 +162,11 @@ def estado8(look, linha):
 
 
 def estado9(look, linha):
+    global tokens
     if look == "M":
+        tokens.append("MEM")
         look = proximo(linha)
         estado10(look, linha)
-    if look.isdigit():
-        look = proximo(linha)
-        estado5(look, linha)
 
 
 def estado10(look, linha):
@@ -181,15 +193,21 @@ def estado10(look, linha):
 def estado11(look, linha):
     if look.isdigit():
         look = proximo(linha)
+        estado11(look, linha)
     elif look.isspace():
         look = proximo(linha)
-        estado11(look, linha)
+        estado12(look, linha)
 
 
 def estado12(look, linha):
+    global parenteses
     if look.isdigit():
         look = proximo(linha)
         estado3(look, linha)
+    if look == "(":
+        parenteses += 1
+        look = proximo(linha)
+        estado0(look, linha)
 
 
 def estado13(look, linha):
@@ -204,11 +222,13 @@ def estado14(look, linha):
         estado4(look, linha)
     elif look.isdigit():
         look = proximo(linha)
-        estado14()
+        estado14(look, linha)
 
 
 def estado15(look, linha):
+    global tokens
     if look == "S":
+        tokens.append("RES")
         look = proximo(linha)
         estado5(look, linha)
 

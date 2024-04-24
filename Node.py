@@ -14,19 +14,14 @@ class Node:
         return f"Node({self.value})"
 
 
-def build_syntax_tree(expression):
+def buildSyntaxTree(expression):
     stack = []
     for k in range(len(expression)):
         token = expression[k]
         if token in ["+", "-", "*", "/", "|", "%", "^"]:
-            # Cria um novo nó com o operador
             node = Node(token)
-
-            # Define os filhos direito e esquerdo retirando da pilha
             node.right = stack.pop()
             node.left = stack.pop()
-
-            # Empilha o nó
             stack.append(node)
         elif token == "MEM":
             try:
@@ -41,11 +36,11 @@ def build_syntax_tree(expression):
                 stack.append(node)
         elif token == "RES":
             n = int(stack.pop().value)
-            stack.append(Node(f"RES {n}"))
+            stack.append(Node(f"{n} RES"))
         else:
-            # Empilha um novo nó com o número
             stack.append(Node(float(token)))
-    return stack.pop()  # Retorna a raiz da árvore
+    return stack.pop()
+
 
 def create_graph(node, graph=None):
     if graph is None:
@@ -65,5 +60,5 @@ def create_graph(node, graph=None):
 def visualize_tree(node):
     global z
     graph = create_graph(node)
-    graph.render(f"syntax_tree_{z}", format="png", cleanup=True, directory="./imgs")
+    graph.render(f"syntax_tree_{z}", format="png", cleanup=True, directory="./imgs/trees")
     z += 1

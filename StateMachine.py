@@ -1,273 +1,273 @@
 import re
 from Node import *
 
-with open("input.txt", "r") as arquivo:
-    linhas = arquivo.readlines()
-    arquivo.close()
+with open("input.txt", "r") as file:
+    lines = file.readlines()
+    file.close()
 
 
-global i, operations, tokens, parenteses, MEM, resultados
+global i, operations, tokens, parenthesis, MEM, results
 operations = ["+", "-", "*", "/", "|", "%", "^"]
 tokens = []
-parenteses = 0
+parenthesis = 0
 MEM = 0
-resultados = []
+results = []
 
 
 def main():
-    global i
-    global isValido
-    global parenteses
+    global i, z
+    global isValid
+    global parenthesis
     global tokens
     global MEM
     MEM = 0
-    for linha in linhas:
+    for line in lines:
         i = 0
-        parenteses = 0
-        isValido = False
+        parenthesis = 0
+        isValid = False
         look = ""
-        start(look, linha)
-        if isValido:
-            print("Linha válida: ", linha.replace("\n", ""))
-            print("Tokens: ", montarPilha(separarTokens(tokens)))
-            visualize_tree(build_syntax_tree(montarPilha(separarTokens(tokens))))
-            print("Resultado: ", solve_rpn(montarPilha(separarTokens(tokens))))
+        start(look, line)
+        if isValid:
+            print("Valid expression: ", line.replace("\n", ""))
+            print("Tokens: ", separateTokens(tokens))
+            visualize_tree(buildSyntaxTree(makeStack(separateTokens(tokens))))
+            print("Result: ", solve_rpn(makeStack(separateTokens(tokens))))
         else:
-            print("Linha inválida: ", linha)
+            print("Not valid expression: ", line)
         print()
         tokens = []
 
 
-def start(look, linha):
-    global parenteses
-    look = linha[i]
+def start(look, line):
+    global parenthesis
+    look = line[i]
     if look == "(":
-        parenteses += 1
-        look = proximo(linha)
-        estado0(look, linha)
+        parenthesis += 1
+        look = next(line)
+        state0(look, line)
 
 
-def proximo(linha):
+def next(line):
     global i, tokens
     try:
-        tokens.append(linha[i])
+        tokens.append(line[i])
     except:
         pass
     i += 1
-    if i >= len(linha):
+    if i >= len(line):
         return "\n"
     else:
-        return linha[i]
+        return line[i]
 
 
-def estado0(look, linha):
-    global parenteses, tokens
+def state0(look, line):
+    global parenthesis, tokens
     if look == "(":
-        parenteses += 1
-        look = proximo(linha)
-        estado0(look, linha)
+        parenthesis += 1
+        look = next(line)
+        state0(look, line)
     elif look.isdigit():
-        look = proximo(linha)
-        estado1(look, linha)
+        look = next(line)
+        state1(look, line)
     elif look == "M":
-        look = proximo(linha)
-        estado8(look, linha)
+        look = next(line)
+        state8(look, line)
     elif look in operations:
-        look = proximo(linha)
-        estado5(look, linha)
+        look = next(line)
+        state5(look, line)
 
 
-def estado1(look, linha):
+def state1(look, line):
     if look.isdigit():
-        look = proximo(linha)
-        estado1(look, linha)
+        look = next(line)
+        state1(look, line)
     elif look.isspace():
-        look = proximo(linha)
-        estado2(look, linha)
+        look = next(line)
+        state2(look, line)
     elif look == ".":
-        look = proximo(linha)
-        estado11(look, linha)
+        look = next(line)
+        state11(look, line)
 
 
-def estado2(look, linha):
-    global parenteses
+def state2(look, line):
+    global parenthesis
     if look.isdigit():
-        look = proximo(linha)
-        estado3(look, linha)
+        look = next(line)
+        state3(look, line)
     elif look == "M":
-        look = proximo(linha)
-        estado8(look, linha)
+        look = next(line)
+        state8(look, line)
     elif look == "R":
-        look = proximo(linha)
-        estado13(look, linha)
+        look = next(line)
+        state13(look, line)
     elif look == "(":
-        parenteses += 1
-        look = proximo(linha)
-        estado0(look, linha)
+        parenthesis += 1
+        look = next(line)
+        state0(look, line)
     elif look in operations:
-        look = proximo(linha)
-        estado5(look, linha)
+        look = next(line)
+        state5(look, line)
 
 
-def estado3(look, linha):
+def state3(look, line):
     if look.isdigit():
-        look = proximo(linha)
-        estado3(look, linha)
+        look = next(line)
+        state3(look, line)
     elif look == ".":
-        look = proximo(linha)
-        estado14(look, linha)
+        look = next(line)
+        state14(look, line)
     elif look.isspace():
-        look = proximo(linha)
-        estado4(look, linha)
+        look = next(line)
+        state4(look, line)
 
 
-def estado4(look, linha):
+def state4(look, line):
     if look in operations:
-        look = proximo(linha)
-        estado5(look, linha)
+        look = next(line)
+        state5(look, line)
 
 
-def estado5(look, linha):
-    global parenteses
+def state5(look, line):
+    global parenthesis
     if look == ")":
-        parenteses -= 1
-        look = proximo(linha)
-        estado6(look, linha)
+        parenthesis -= 1
+        look = next(line)
+        state6(look, line)
 
 
-def estado6(look, linha):
-    global parenteses
+def state6(look, line):
+    global parenthesis
     if look == "\n":
-        look = proximo(linha)
-        estado7(look, linha)
+        look = next(line)
+        state7(look, line)
     elif look == "(":
-        parenteses += 1
-        look = proximo(linha)
-        estado0(look, linha)
+        parenthesis += 1
+        look = next(line)
+        state0(look, line)
     elif look.isspace():
-        look = proximo(linha)
-        estado0(look, linha)
+        look = next(line)
+        state0(look, line)
     elif look == ")":
-        parenteses -= 1
-        look = proximo(linha)
-        estado6(look, linha)
+        parenthesis -= 1
+        look = next(line)
+        state6(look, line)
     elif look in operations:
-        look = proximo(linha)
-        estado1(look, linha)
+        look = next(line)
+        state1(look, line)
 
 
-def estado7(look, linha):
-    global isValido, parenteses
-    if parenteses == 0:
-        isValido = True
+def state7(look, line):
+    global isValid, parenthesis
+    if parenthesis == 0:
+        isValid = True
 
 
-def estado8(look, linha):
+def state8(look, line):
     if look == "E":
-        look = proximo(linha)
-        estado9(look, linha)
+        look = next(line)
+        state9(look, line)
 
 
-def estado9(look, linha):
+def state9(look, line):
     global tokens
     if look == "M":
         tokens.append("MEM")
-        look = proximo(linha)
-        estado10(look, linha)
+        look = next(line)
+        state10(look, line)
 
 
-def estado10(look, linha):
-    global parenteses
+def state10(look, line):
+    global parenthesis
     if look.isspace():
-        look = proximo(linha)
-        estado10(look, linha)
+        look = next(line)
+        state10(look, line)
     elif look == ")":
-        parenteses -= 1
-        look = proximo(linha)
-        estado6(look, linha)
+        parenthesis -= 1
+        look = next(line)
+        state6(look, line)
     elif look == "(":
-        parenteses += 1
-        look = proximo(linha)
-        estado0(look, linha)
+        parenthesis += 1
+        look = next(line)
+        state0(look, line)
     elif look in operations:
-        look = proximo(linha)
-        estado5(look, linha)
+        look = next(line)
+        state5(look, line)
     elif look.isdigit():
-        look = proximo(linha)
-        estado3(look, linha)
+        look = next(line)
+        state3(look, line)
 
 
-def estado11(look, linha):
+def state11(look, line):
     if look.isdigit():
-        look = proximo(linha)
-        estado11(look, linha)
+        look = next(line)
+        state11(look, line)
     elif look.isspace():
-        look = proximo(linha)
-        estado12(look, linha)
+        look = next(line)
+        state12(look, line)
 
 
-def estado12(look, linha):
-    global parenteses
+def state12(look, line):
+    global parenthesis
     if look.isdigit():
-        look = proximo(linha)
-        estado3(look, linha)
+        look = next(line)
+        state3(look, line)
     if look == "(":
-        parenteses += 1
-        look = proximo(linha)
-        estado0(look, linha)
+        parenthesis += 1
+        look = next(line)
+        state0(look, line)
 
 
-def estado13(look, linha):
+def state13(look, line):
     if look == "E":
-        look = proximo(linha)
-        estado15(look, linha)
+        look = next(line)
+        state15(look, line)
 
 
-def estado14(look, linha):
+def state14(look, line):
     if look.isspace():
-        look = proximo(linha)
-        estado4(look, linha)
+        look = next(line)
+        state4(look, line)
     elif look.isdigit():
-        look = proximo(linha)
-        estado14(look, linha)
+        look = next(line)
+        state14(look, line)
 
 
-def estado15(look, linha):
+def state15(look, line):
     global tokens
     if look == "S":
         tokens.append("RES")
-        look = proximo(linha)
-        estado5(look, linha)
+        look = next(line)
+        state5(look, line)
 
 
-def separarTokens(tokens):
+def separateTokens(tokens):
     tokens = "".join(tokens)
     pattern = re.compile(r"\d+\.\d+|\d+|MEM|RES|[()+\-*\/%^]| ")
     return pattern.findall(tokens)
 
 
-def montarPilha(tokens):
+def makeStack(tokens):
     global operations
-    pilha = []
+    stack = []
     for token in tokens:
         try:
             if token == "MEM" or token == "RES" or token in operations:
-                pilha.append(token)
+                stack.append(token)
             elif float(token):
-                pilha.append(float(token))
+                stack.append(float(token))
         except:
             pass
-    return pilha
+    return stack
 
 
 def solve_rpn(expression):
-    global MEM, resultados
+    global MEM, results
     stack = []
     for j in range(len(expression)):
         token = expression[j]
         if token in operations:
-            b = stack.pop()  # Remove e retorna o último item
-            a = stack.pop()  # Remove e retorna o penúltimo item
+            b = stack.pop()
+            a = stack.pop()
             if token == "+":
                 stack.append(a + b)
             elif token == "-":
@@ -276,9 +276,9 @@ def solve_rpn(expression):
                 stack.append(a * b)
             elif token == "/":
                 stack.append(a / b)
-            elif token == "%":  # Trata o módulo
+            elif token == "%":
                 stack.append(a % b)
-            elif token == "^":  # Trata a exponenciação
+            elif token == "^":
                 stack.append(a**b)
         elif token == "MEM":
             try:
@@ -293,13 +293,13 @@ def solve_rpn(expression):
         elif token == "RES":
             try:
                 n = int(stack.pop())
-                stack.append(resultados[-n])
+                stack.append(results[-n])
             except:
                 stack.append(0.0)
         else:
             stack.append(float(token))
-    resultados.append(stack.pop())
-    return resultados[-1]  # Retorna o resultado final
+    results.append(stack.pop())
+    return results[-1]
 
 
 main()

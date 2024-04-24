@@ -9,20 +9,21 @@ The program you will developed reads the code in an input.txt file and generate 
 
 The following shows the rules that the program must follow to generate the tokens and the abstract syntactic tree.
 
-E ::= T E'
-E' ::= T O E'
-E' ::= ''
-T ::= num
-T ::= MEM
-T ::= RES
-T ::= ( E )
-O ::= +
-O ::= -
-O ::= \*
-O ::= /
-O ::= |
-O ::= %
-O ::= ^
+
+- E ::= T E'
+- E' ::= T O E'
+- E' ::= ''
+- T ::= num
+- T ::= MEM
+- T ::= RES
+- T ::= ( E )
+- O ::= +
+- O ::= -
+- O ::= \*
+- O ::= /
+- O ::= |
+- O ::= %
+- O ::= ^
 
 ### First and Follow
 ![First and Follow](./imgs/first_and_follow.png)

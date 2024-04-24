@@ -1,4 +1,4 @@
-# Project Name
+# Projeto Compilador - Fase 2
 
 ## Description
 

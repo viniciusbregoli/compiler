@@ -1,9 +1,12 @@
 import re
+import sys
 from Node import *
 
-with open("input.txt", "r") as file:
-    lines = file.readlines()
-    file.close()
+def ler_arquivo(nome_arquivo):
+    with open(nome_arquivo, "r") as file:
+        lines = file.readlines()
+        file.close()
+    main(lines)
 
 
 global i, operations, tokens, parenthesis, MEM, results
@@ -14,7 +17,7 @@ MEM = 0
 results = []
 
 
-def main():
+def main(lines):
     global i, z
     global isValid
     global parenthesis
@@ -302,4 +305,9 @@ def solve_rpn(expression):
     return results[-1]
 
 
-main()
+if __name__ == "__main__":
+    if len(sys.argv) < 2:
+        print("Erro: Por favor, forneça o nome do arquivo como argumento.")
+    else:
+        nome_arquivo = sys.argv[1]
+        ler_arquivo(nome_arquivo)
